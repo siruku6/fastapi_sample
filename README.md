@@ -12,9 +12,9 @@ $ pipenv install
 # Check api behaviour
 
 Run `uvicorn main:app --reload --host 0.0.0.0`,  
-then you can access [FastAPI Swagger UI](http://0.0.0.0:8000/docs) with your browser.
+then you can access [FastAPI Swagger UI](http://localhost:8000/docs) with your browser.
 
 ```bash
 # Test
-$ curl 0.0.0.0:8000
+$ curl localhost:8000
 ```
