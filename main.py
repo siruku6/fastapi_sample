@@ -1,10 +1,22 @@
 import datetime
-from pydantic import BaseModel
+import logging
 from typing import Dict, Optional
 import time
+
 from fastapi import FastAPI, BackgroundTasks, HTTPException
+from pydantic import BaseModel
+import uvicorn
+
 
 from rec import receive_api_request
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename="logs/app.log",
+    format="%(asctime)s %(levelname)-7s %(message)s"
+)
+logger = logging.getLogger('uvicorn')
 
 
 class LongLastingJob(BaseModel):
@@ -15,19 +27,15 @@ class LongLastingJob(BaseModel):
         try:
             _job = self
             for i in range(10):
-                print(
-                    f'{datetime.datetime.now():%H:%M:%S}',
-                    'job[{}]: Running...({} / 10)'.format(self.job_id, i + 1)
-                )
+                logger.info('job[{}]: Running...({} / 10)'.format(self.job_id, i + 1))
                 time.sleep(1)
 
                 if self.is_cancelled:
-                    del _job
                     break
         except BaseException as error:
             print(error)
-            del _job
         finally:
+            del _job
             print('job[{}]: 時間のかかる処理が終わりました'.format(self.job_id))
 
 
@@ -62,8 +70,10 @@ def start(job_id: int, background_tasks: BackgroundTasks):
     # NOTE: This processing (job) is going to run on background.
     job = LongLastingJob(job_id=job_id)
     pool.jobs[job_id] = job
+    # This calls the method '__call__' of the job's class.
     background_tasks.add_task(job)
 
+    # import pdb; pdb.set_trace()
     return {"message": "Received time taking job."}
 
 
@@ -86,11 +96,9 @@ def status(job_id: int):
         return {"message": f"{job_id}は実行していません"}
 
 
+def main():
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=True)
 
-# How to execute
-# $ curl -X POST http://localhost:8000/2/
-# {"message":"Received time taking job."}
-# $ curl -X GET http://localhost:8000/2/
-# {"message":"2は実行中です"}
-# $ curl -X DELETE http://localhost:8000/2/
-# {"message":"2の中止処理を受け付けました"}
+
+if __name__ == '__main__':
+    main()
