@@ -3,16 +3,32 @@ trying to use fastapi
 
 # Setup Development Environment
 
+## How to run server on Docker container
+
 ```bash
 $ git clone https://github.com/siruku6/fastapi_sample.git
 $ cd fastapi_sample
-$ pipenv install
+$ docker-compose build
+$ docker-compose up
+```
+
+## How to run server localy
+
+```bash
+$ git clone https://github.com/siruku6/fastapi_sample.git
+$ cd fastapi_sample
+$ poetry install
+
+# Run server
+$ python main.py
+# or
+$ uvicorn main:app --reload --host 0.0.0.0
 ```
 
 # Check api behaviour
 
-Run `uvicorn main:app --reload --host 0.0.0.0` or `python server.py`  
-then you can access [FastAPI Swagger UI](http://localhost:8000/docs) with your browser.
+You can access [FastAPI Swagger UI](http://localhost:8000/docs) with your browser.
+And also running following commands can show you the behvaiour of API.
 
 ```bash
 # Test
