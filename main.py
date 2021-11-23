@@ -1,4 +1,3 @@
-import datetime
 import logging
 from typing import Dict, Optional
 import time
@@ -23,9 +22,9 @@ class LongLastingJob(BaseModel):
     job_id: int
     is_cancelled: bool = False
 
-    def __call__(self):
+    def __call__(self) -> None:
         try:
-            _job = self
+            _job: LongLastingJob = self
             for i in range(10):
                 logger.info('job[{}]: Running...({} / 10)'.format(self.job_id, i + 1))
                 time.sleep(1)
@@ -39,7 +38,6 @@ class LongLastingJob(BaseModel):
             print('job[{}]: 時間のかかる処理が終わりました'.format(self.job_id))
 
 
-
 class JobsPool(BaseModel):
     jobs: Dict[int, LongLastingJob] = {}
 
@@ -49,26 +47,26 @@ pool = JobsPool()
 
 
 @app.get('/')
-def hello():
+def hello() -> Dict[str, str]:
     time.sleep(2)
     return {"text": "hello world!"}
 
 
-@app.get('/get/{path}') # methodとendpointの指定
+@app.get('/get/{path}')  # methodとendpointの指定
 def path_and_query_params(
     path: str,
     # query: int,
     default_none: Optional[str] = None
-):
+) -> Dict[str, str]:
     hoge_id: int = receive_api_request()
     return {"text": f"hello, {path} and {hoge_id}"}
 
 
 @app.post('/{job_id}/', status_code=202)
-def start(job_id: int, background_tasks: BackgroundTasks):
+def start(job_id: int, background_tasks: BackgroundTasks) -> Dict[str, str]:
 
     # NOTE: This processing (job) is going to run on background.
-    job = LongLastingJob(job_id=job_id)
+    job: LongLastingJob = LongLastingJob(job_id=job_id)
     pool.jobs[job_id] = job
     # This calls the method '__call__' of the job's class.
     background_tasks.add_task(job)
@@ -78,25 +76,25 @@ def start(job_id: int, background_tasks: BackgroundTasks):
 
 
 @app.delete('/{job_id}/', status_code=202)
-def stop(job_id: int):
-    t = pool.jobs.get(job_id)
-    if t is None:
+def stop(job_id: int) -> Dict[str, str]:
+    job: Optional[LongLastingJob] = pool.jobs.get(job_id)
+    if job is None:
         raise HTTPException(400, detail="job is not exists.")
 
-    t.is_cancelled = True
+    job.is_cancelled = True
     del pool.jobs[job_id]
     return {"message": f"{job_id}の中止処理を受け付けました"}
 
 
 @app.get('/{job_id}/', status_code=200)
-def status(job_id: int):
+def status(job_id: int) -> Dict[str, str]:
     if job_id in pool.jobs:
         return {"message": f"{job_id}は実行中です"}
     else:
         return {"message": f"{job_id}は実行していません"}
 
 
-def main():
+def main() -> None:
     uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=True)
 
 

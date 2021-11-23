@@ -1,5 +1,5 @@
-def receive_api_request():
-    hoge_id, date, days = 1234, '2021-11-04', 12
+def receive_api_request() -> int:
+    hoge_id, date = 1234, '2021-11-04'
 
     # main(hoge_id, date, days)
 

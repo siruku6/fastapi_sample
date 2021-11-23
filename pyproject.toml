@@ -12,7 +12,27 @@ pydantic = "^1.8.2"
 uvicorn = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+mypy = "^0.910"
+pyproject-flake8 = "^0.0.1-alpha.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+###############################################################
+#      Lint tool
+###############################################################
+[tool.flake8]
+ignore = "E701,W503"
+max-line-length = 120
+exclude = ".venv"
+max-complexity = 10
+
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_return_any = true
+warn_unused_configs = true
